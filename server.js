@@ -32,6 +32,7 @@ async function register() {
 
 app.post("/register", (req, res) => {
   let { name, ip } = req.body;
+   console.log(`Registered: ${name} at ${ip}`);
   knownPeers.add(JSON.stringify({ name, ip }));
   res.json({ message: "Registered" });
 });
