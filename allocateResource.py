@@ -145,7 +145,7 @@ def websocket_server_main():
         try:
             server = await websockets.serve(handle_websocket, "0.0.0.0", 8765)
             print("WebSocket server started successfully on port 8765")
-            await asyncio.Future()  # Keep the server running until manually stopped
+            await asyncio.Future()  
         except Exception as e:
             print(f"Error in WebSocket server: {e}")
     

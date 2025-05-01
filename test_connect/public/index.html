@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Docker Terminal</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
   <style>
-    body, html { margin: 0; height: 100%; background: black; }
+    html, body { height: 100%; margin: 0; background: black; }
     #terminal { height: 100%; width: 100%; }
   </style>
 </head>
@@ -18,8 +18,8 @@
 
     const socket = new WebSocket("ws://localhost:3000");
 
-    socket.onmessage = (event) => {
-      term.write(event.data);
+    socket.onmessage = e => {
+      term.write(e.data);
     };
 
     term.onData(data => {
