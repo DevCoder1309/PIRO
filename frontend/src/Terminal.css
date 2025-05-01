@@ -1,0 +1,37 @@
+.terminal-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #1e1e1e;
+    color: #f0f0f0;
+}
+
+.terminal-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #3d3d3d;
+}
+
+.terminal-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: normal;
+    color: #f0f0f0;
+}
+
+.terminal {
+    flex: 1;
+    padding: 4px;
+    background-color: #000;
+    overflow: hidden;
+}
+
+.xterm {
+    height: 100%;
+}
+
+.xterm-screen {
+    padding: 2px;
+}

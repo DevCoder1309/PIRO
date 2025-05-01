@@ -1,0 +1,78 @@
+.peer-form {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 32px;
+    background-color: #1e293b;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    color: #f1f5f9;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.form-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    text-align: center;
+    color: #e2e8f0;
+}
+
+label {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #cbd5e1;
+}
+
+.input {
+    width: 100%;
+    padding: 12px;
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: #e2e8f0;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background-color: #1e293b;
+}
+
+.read-only {
+    background-color: #1f2937;
+    cursor: not-allowed;
+    color: #94a3b8;
+}
+
+.textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.error {
+    color: #f87171;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+.submit-button {
+    margin-top: 28px;
+    width: 100%;
+    padding: 12px 0;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+}
+
+.submit-button:hover {
+    background-color: #2563eb;
+}

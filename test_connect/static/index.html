@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Docker Terminal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css">
+  <style>
+    body, html { margin: 0; height: 100%; background: black; }
+    #terminal { height: 100%; width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="terminal"></div>
+  <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+  <script>
+    const term = new Terminal();
+    term.open(document.getElementById('terminal'));
+
+    const socket = new WebSocket("ws://localhost:3000");
+
+    socket.onmessage = (event) => {
+      term.write(event.data);
+    };
+
+    term.onData(data => {
+      socket.send(data);
+    });
+  </script>
+</body>
+</html>

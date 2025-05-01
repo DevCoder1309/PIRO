@@ -1,9 +1,13 @@
 {
   "dependencies": {
+    "@xterm/xterm": "^5.5.0",
     "axios": "^1.8.3",
+    "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dockerode": "^4.0.6",
     "express": "^4.21.2",
     "nodemon": "^3.1.9",
-    "socketio": "^1.0.0"
+    "socketio": "^1.0.0",
+    "ws": "^8.18.1"
   }
 }

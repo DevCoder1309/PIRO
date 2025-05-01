@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import PeerForm from "./PeerForm";
+import "./Details.css";
 
 export default function Details() {
   const [nodeDetails, setNodeDetails] = useState(null);
@@ -17,18 +19,23 @@ export default function Details() {
       .catch((err) => console.error("Error fetching peer info:", err));
   }, [peerIP]);
 
-  if (!nodeDetails) return <div className="p-6">Loading...</div>;
+  if (!nodeDetails) return <div className="p-6 text-white">Loading...</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold">Peer Node Details</h1>
-      <ul className="mt-4 space-y-2">
-        {Object.entries(nodeDetails).map(([key, value]) => (
-          <li key={key} className="bg-gray-200 p-2 rounded">
-            <strong>{key}:</strong> {value}
-          </li>
-        ))}
-      </ul>
+    <div className="details-container">
+      <div className="left-panel">
+        <h1 className="section-title">Peer Node Details</h1>
+        <ul className="details-list">
+          {Object.entries(nodeDetails).map(([key, value]) => (
+            <li key={key}>
+              <strong>{key}:</strong> {value}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="right-panel">
+        <PeerForm IP={peerIP} />
+      </div>
     </div>
   );
 }
