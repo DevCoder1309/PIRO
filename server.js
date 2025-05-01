@@ -1,19 +1,23 @@
-const express = require('express')
-const axios = require('axios')
-const cors = require('cors')
+const express = require("express");
+const axios = require("axios");
+const cors = require("cors");
 const os = require("os");
+
 const app = express();
 app.use(express.json());
-app.use(cors()); 
+app.use(cors());
 
 const PORT = process.env.PORT || 3001;
 const NODE_ID =
   process.env.NODE_ID || `Node_${Math.floor(Math.random() * 1000)}`;
 const SELF_IP = `http://localhost:${PORT}`;
+
 let knownPeers = new Set();
 let bootstrapNodes = process.env.BOOTSTRAP_NODES
   ? process.env.BOOTSTRAP_NODES.split(",")
   : [];
+
+console.log(bootstrapNodes)
 
 async function register() {
   for (let i = 0; i < 2; i++) {
@@ -25,25 +29,29 @@ async function register() {
           name: NODE_ID,
           ip: SELF_IP,
         });
-      } catch {}
+      } catch (error) {
+        console.error(`Failed to register with ${randomNode}:`, error.message);
+      }
     }
   }
 }
 
+// Register incoming peer
 app.post("/register", (req, res) => {
   let { name, ip } = req.body;
-   console.log(`Registered: ${name} at ${ip}`);
+  console.log(`Registered: ${name} at ${ip}`);
   knownPeers.add(JSON.stringify({ name, ip }));
   res.json({ message: "Registered" });
 });
 
+// Provide own details
 app.get("/details", (req, res) => {
   const osType = os.platform();
-  const freeMemory = (os.freemem() / 1024 / 1024 / 1024).toFixed(2); 
+  const freeMemory = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
   const totalMemory = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
   const cpuCores = os.cpus().length;
   const cpuModel = os.cpus()[0].model;
-  const uptime = os.uptime(); 
+  const uptime = os.uptime();
 
   res.json({
     os: osType,
@@ -55,6 +63,7 @@ app.get("/details", (req, res) => {
   });
 });
 
+// Share known peers
 app.get("/peers", async (req, res) => {
   let allPeers = new Set(knownPeers);
   for (let peer of [...knownPeers]) {
@@ -62,9 +71,26 @@ app.get("/peers", async (req, res) => {
     try {
       let { data } = await axios.get(`${ip}/peers`);
       data.forEach((p) => allPeers.add(JSON.stringify(p)));
-    } catch {}
+    } catch (error) {
+      console.error(`Failed to fetch peers from ${ip}:`, error.message);
+    }
   }
   res.json([...allPeers].map((p) => JSON.parse(p)));
+});
+
+// New: Fetch system details of another peer
+app.get("/fetch-peer-info", async (req, res) => {
+  const peerIP = req.query.ip;
+  if (!peerIP) return res.status(400).send("Missing peer IP in query");
+
+  try {
+    const response = await axios.get(`http://${peerIP}/details`);
+    res.json(response.data);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch peer info", details: error.message });
+  }
 });
 
 app.listen(PORT, async () => {
