@@ -1,1 +1,1 @@
-PORT=3002 NODE_ID=aren BOOTSTRAP_NODES=http://192.168.1.3:3001,http://192.168.1.3:3004 node server.js
+PORT=3002 NODE_ID=aren BOOTSTRAP_NODES=http://192.168.1.3:3004 node ../server.js

@@ -1,6 +1,6 @@
-const express = require("express");
-const axios = require("axios");
-const cors = require("cors");
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
 const os = require("os");
 
 const app = express();
@@ -8,44 +8,69 @@ app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 3001;
-const NODE_ID =
-  process.env.NODE_ID || `Node_${Math.floor(Math.random() * 1000)}`;
-const SELF_IP = `http://localhost:${PORT}`;
+const NODE_ID = process.env.NODE_ID || `Node_${Math.floor(Math.random() * 1000)}`;
+const SELF_IP = `http://${getLocalIP()}:${PORT}`;
 
 let knownPeers = new Set();
 let bootstrapNodes = process.env.BOOTSTRAP_NODES
   ? process.env.BOOTSTRAP_NODES.split(",")
   : [];
 
-console.log(bootstrapNodes)
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (
+        iface.family === 'IPv4' &&
+        !iface.internal &&
+        !iface.address.startsWith('127.') &&
+        !iface.address.startsWith('169.')
+      ) {
+        return iface.address;
+      }
+    }
+  }
+  return '127.0.0.1';
+}
 
 async function register() {
   for (let i = 0; i < 2; i++) {
     if (bootstrapNodes.length > 0) {
-      let randomNode =
-        bootstrapNodes[Math.floor(Math.random() * bootstrapNodes.length)];
+      let randomNode = bootstrapNodes[Math.floor(Math.random() * bootstrapNodes.length)];
+      console.log(`Trying to register with ${randomNode}`);
       try {
         await axios.post(`${randomNode}/register`, {
           name: NODE_ID,
           ip: SELF_IP,
         });
-      } catch (error) {
-        console.error(`Failed to register with ${randomNode}:`, error.message);
+      } catch (e) {
+        console.error("Failed to register with", randomNode);
       }
     }
   }
 }
 
-// Register incoming peer
 app.post("/register", (req, res) => {
-  let { name, ip } = req.body;
+  const { name, ip } = req.body;
   console.log(`Registered: ${name} at ${ip}`);
   knownPeers.add(JSON.stringify({ name, ip }));
   res.json({ message: "Registered" });
 });
 
-// Provide own details
-app.get("/details", (req, res) => {
+app.get("/details", async (req, res) => {
+  const queryIP = req.query.ip;
+
+  if (queryIP && queryIP !== SELF_IP) {
+    try {
+      const { data } = await axios.get(`${queryIP}/details`);
+      return res.json(data);
+    } catch (e) {
+      return res
+        .status(500)
+        .json({ error: "Unable to fetch remote node details" });
+    }
+  }
+
   const osType = os.platform();
   const freeMemory = (os.freemem() / 1024 / 1024 / 1024).toFixed(2);
   const totalMemory = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
@@ -54,6 +79,8 @@ app.get("/details", (req, res) => {
   const uptime = os.uptime();
 
   res.json({
+    name: NODE_ID,
+    ip: SELF_IP,
     os: osType,
     freeMemoryGB: freeMemory,
     totalMemoryGB: totalMemory,
@@ -63,7 +90,6 @@ app.get("/details", (req, res) => {
   });
 });
 
-// Share known peers
 app.get("/peers", async (req, res) => {
   let allPeers = new Set(knownPeers);
   for (let peer of [...knownPeers]) {
@@ -71,29 +97,12 @@ app.get("/peers", async (req, res) => {
     try {
       let { data } = await axios.get(`${ip}/peers`);
       data.forEach((p) => allPeers.add(JSON.stringify(p)));
-    } catch (error) {
-      console.error(`Failed to fetch peers from ${ip}:`, error.message);
-    }
+    } catch {}
   }
   res.json([...allPeers].map((p) => JSON.parse(p)));
 });
 
-// New: Fetch system details of another peer
-app.get("/fetch-peer-info", async (req, res) => {
-  const peerIP = req.query.ip;
-  if (!peerIP) return res.status(400).send("Missing peer IP in query");
-
-  try {
-    const response = await axios.get(`http://${peerIP}/details`);
-    res.json(response.data);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch peer info", details: error.message });
-  }
-});
-
 app.listen(PORT, async () => {
-  console.log(`Node ${NODE_ID} running on port ${PORT}`);
+  console.log(`Node ${NODE_ID} running at ${SELF_IP}`);
   await register();
 });

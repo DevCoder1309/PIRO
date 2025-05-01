@@ -6,15 +6,13 @@ export default function Details() {
   const [nodeDetails, setNodeDetails] = useState(null);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-
-  const peerIP = params.get("ip"); 
-  const currentNode = "http://localhost:3001"; 
+  const peerIP = params.get("ip");
 
   useEffect(() => {
     if (!peerIP) return;
 
     axios
-      .get(`${currentNode}/fetch-peer-info?ip=${peerIP}`)
+      .get(`http://localhost:3001/details?ip=${encodeURIComponent(peerIP)}`)
       .then((res) => setNodeDetails(res.data))
       .catch((err) => console.error("Error fetching peer info:", err));
   }, [peerIP]);
