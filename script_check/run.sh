@@ -1,2 +1,1 @@
 PORT=3001 NODE_ID=A BOOTSTRAP_NODES=http://192.168.1.5:3002 node ../server.js
-

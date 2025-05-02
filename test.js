@@ -5,6 +5,8 @@ const Docker = require("dockerode");
 const path = require("path");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const util = require("util");
+const exec = util.promisify(require("child_process").exec);
 
 const app = express();
 const server = http.createServer(app);
@@ -16,9 +18,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// Route: Start Shell
 app.post("/start_shell", async (req, res) => {
-  const {
+  let {
     instanceName,
     ip,
     osImage,
@@ -27,7 +28,8 @@ app.post("/start_shell", async (req, res) => {
     extraUsers,
     tools,
   } = req.body;
-
+  console.log(ip);
+  ip = ip.replace(/^(https?:\/\/)?/, "").split(":")[0];
   try {
     const container = await docker.createContainer({
       Image: osImage || "ubuntu",
@@ -42,11 +44,27 @@ app.post("/start_shell", async (req, res) => {
         `USERNAME=${username}`,
       ],
     });
+    async function command() {
+      const { stdout, stderr } = await exec(
+        `docker context create ${instanceName} --docker host=tcp://${ip}:2375`
+      );
+      console.log("stdout:", stdout);
+      console.log("stderr:", stderr);
+    }
+    async function command2() {
+      const { stdout, stderr } = await exec(
+        `docker context use ${instanceName}`
+      );
+      console.log("stdout:", stdout);
+      console.log("stderr:", stderr);
+    }
+    await command();
+    await command2();
 
-    console.log(`Container created with ID: ${container.id.substring(0, 12)}`); 
+    console.log(`Container created with ID: ${container.id.substring(0, 12)}`);
 
     await container.start();
-    res.json({ container_id: container.id.substring(0, 12) }); 
+    res.json({ container_id: container.id.substring(0, 12) });
   } catch (err) {
     console.error("Error launching container:", err);
     res.status(500).json({ error: err.message });
