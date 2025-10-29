@@ -1,1 +1,1 @@
-PORT=3004 NODE_ID=D BOOTSTRAP_NODES=http://192.168.1.3:3003 node ../server.js
+PORT=3004 NODE_ID=D BOOTSTRAP_NODES=http://192.168.1.18:3003 node ../server.js
